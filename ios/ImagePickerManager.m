@@ -1,5 +1,7 @@
 #import "ImagePickerManager.h"
+#import <React/RCTBridge+Private.h>
 #import <React/RCTConvert.h>
+#import <React/RCTRootView.h>
 #import <AssetsLibrary/AssetsLibrary.h>
 #import <AVFoundation/AVFoundation.h>
 #import <Photos/Photos.h>
@@ -19,6 +21,8 @@
 @end
 
 @implementation ImagePickerManager
+
+@synthesize bridge = _bridge;
 
 RCT_EXPORT_MODULE();
 
@@ -181,6 +185,27 @@ RCT_EXPORT_METHOD(showImagePicker:(NSDictionary *)options callback:(RCTResponseS
     if ([[self.options objectForKey:@"allowsEditing"] boolValue]) {
         self.picker.allowsEditing = true;
     }
+
+    NSString *overlayRootName = [self.options valueForKey:@"overlayComponentName"];
+    if ([overlayRootName isKindOfClass:[NSString class]] && overlayRootName.length > 0) {
+        RCTBridge *bridge = self.bridge;
+
+        // weird hack to get the ~real~ bridge, as it does the work we need
+        if ([bridge isKindOfClass:[RCTBatchedBridge class]]) {
+            RCTBatchedBridge *bb = (RCTBatchedBridge *)bridge;
+            bridge = bb.parentBridge;
+        }
+
+        RCTRootView *rootView = [[RCTRootView alloc] initWithBridge:bridge
+                                                         moduleName:overlayRootName
+                                                  initialProperties:nil];
+
+        rootView.backgroundColor = [UIColor clearColor];
+        rootView.frame = self.picker.view.bounds;
+
+        self.picker.cameraOverlayView = rootView;
+    }
+
     self.picker.modalPresentationStyle = UIModalPresentationCurrentContext;
     self.picker.delegate = self;
 
