@@ -201,7 +201,13 @@ RCT_EXPORT_METHOD(showImagePicker:(NSDictionary *)options callback:(RCTResponseS
                                                   initialProperties:nil];
 
         rootView.backgroundColor = [UIColor clearColor];
-        rootView.frame = self.picker.view.bounds;
+
+        // wow, hacky. just to overlay the camera area, and not the controls. ish.
+        CGRect rect = CGRectMake(CGRectGetMinX(self.picker.view.bounds),
+                                 CGRectGetMinY(self.picker.view.bounds) + 44,
+                                 CGRectGetWidth(self.picker.view.bounds),
+                                 CGRectGetHeight(self.picker.view.bounds) - 184);
+        rootView.frame = rect;
 
         self.picker.cameraOverlayView = rootView;
     }
