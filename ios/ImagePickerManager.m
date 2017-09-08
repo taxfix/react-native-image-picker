@@ -135,6 +135,13 @@ RCT_EXPORT_METHOD(showImagePicker:(NSDictionary *)options callback:(RCTResponseS
 
 - (void)launchImagePicker:(RNImagePickerTarget)target
 {
+    if (![NSThread isMainThread]) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self launchImagePicker:target];
+        });
+        return;
+    }
+
     self.picker = [[UIImagePickerController alloc] init];
 
     if (target == RNImagePickerTargetCamera) {
