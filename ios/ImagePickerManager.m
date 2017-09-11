@@ -194,7 +194,8 @@ RCT_EXPORT_METHOD(showImagePicker:(NSDictionary *)options callback:(RCTResponseS
     }
 
     NSString *overlayRootName = [self.options valueForKey:@"overlayComponentName"];
-    if ([overlayRootName isKindOfClass:[NSString class]] && overlayRootName.length > 0) {
+    if (target == RNImagePickerTargetCamera &&
+        [overlayRootName isKindOfClass:[NSString class]] && overlayRootName.length > 0) {
         RCTBridge *bridge = self.bridge;
 
         // weird hack to get the ~real~ bridge, as it does the work we need
