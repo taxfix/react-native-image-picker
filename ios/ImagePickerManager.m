@@ -17,6 +17,7 @@
 @property (nonatomic, strong) NSDictionary *defaultOptions;
 @property (nonatomic, retain) NSMutableDictionary *options, *response;
 @property (nonatomic, strong) NSArray *customButtons;
+@property (nonatomic, nullable, strong) RCTRootView *cameraOverlayView;
 
 @end
 
@@ -204,20 +205,32 @@ RCT_EXPORT_METHOD(showImagePicker:(NSDictionary *)options callback:(RCTResponseS
             bridge = bb.parentBridge;
         }
 
-        RCTRootView *rootView = [[RCTRootView alloc] initWithBridge:bridge
+        self.cameraOverlayView = [[RCTRootView alloc] initWithBridge:bridge
                                                          moduleName:overlayRootName
                                                   initialProperties:nil];
 
-        rootView.backgroundColor = [UIColor clearColor];
+        self.cameraOverlayView.backgroundColor = [UIColor clearColor];
 
         // wow, hacky. just to overlay the camera area, and not the controls. ish.
         CGRect rect = CGRectMake(CGRectGetMinX(self.picker.view.bounds),
                                  CGRectGetMinY(self.picker.view.bounds) + 44,
                                  CGRectGetWidth(self.picker.view.bounds),
                                  CGRectGetHeight(self.picker.view.bounds) - 184);
-        rootView.frame = rect;
+        self.cameraOverlayView.frame = rect;
 
-        self.picker.cameraOverlayView = rootView;
+        self.picker.cameraOverlayView = self.cameraOverlayView;
+
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(showOverlay)
+                                                     name:@"_UIImagePickerControllerUserDidRejectItem"
+                                                   object:nil];
+
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(hideOverlay)
+                                                     name:@"_UIImagePickerControllerUserDidCaptureItem"
+                                                   object:nil];
+    } else {
+        self.cameraOverlayView = nil;
     }
 
     self.picker.modalPresentationStyle = UIModalPresentationCurrentContext;
@@ -551,6 +564,8 @@ RCT_EXPORT_METHOD(showImagePicker:(NSDictionary *)options callback:(RCTResponseS
 
     dispatch_async(dispatch_get_main_queue(), ^{
         [picker dismissViewControllerAnimated:YES completion:dismissCompletionBlock];
+
+        [[NSNotificationCenter defaultCenter] removeObserver:self];
     });
 }
 
@@ -560,6 +575,8 @@ RCT_EXPORT_METHOD(showImagePicker:(NSDictionary *)options callback:(RCTResponseS
         [picker dismissViewControllerAnimated:YES completion:^{
             self.callback(@[@{@"didCancel": @YES}]);
         }];
+
+        [[NSNotificationCenter defaultCenter] removeObserver:self];
     });
 }
 
@@ -723,6 +740,22 @@ RCT_EXPORT_METHOD(showImagePicker:(NSDictionary *)options callback:(RCTResponseS
         NSLog(@"Error setting skip backup attribute: file not found");
         return @NO;
     }
+}
+
+- (void)showOverlay {
+    if (self.picker.sourceType != UIImagePickerControllerSourceTypeCamera) {
+        return;
+    }
+
+    self.picker.cameraOverlayView = self.cameraOverlayView;
+}
+
+- (void)hideOverlay {
+    if (self.picker.sourceType != UIImagePickerControllerSourceTypeCamera) {
+        return;
+    }
+
+    self.picker.cameraOverlayView = nil;
 }
 
 #pragma mark - Class Methods
