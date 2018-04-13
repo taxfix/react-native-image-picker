@@ -550,9 +550,9 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
 
     if (!permissionsGrated)
     {
-      final Boolean dontAskAgain = ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE) && ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.CAMERA);
+      final Boolean ask = ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE) && ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.CAMERA);
 
-      if (dontAskAgain)
+      if (!ask)
       {
         final AlertDialog dialog = PermissionUtils
                 .explainingDialog(this, options, new PermissionUtils.OnExplainingPermissionCallback()
@@ -561,12 +561,7 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
                   public void onCancel(WeakReference<ImagePickerModule> moduleInstance,
                                        DialogInterface dialogInterface)
                   {
-                    final ImagePickerModule module = moduleInstance.get();
-                    if (module == null)
-                    {
-                      return;
-                    }
-                    module.doOnCancel();
+                    responseHelper.invokeCancel(callback);
                   }
 
                   @Override
@@ -590,6 +585,7 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
                   }
                 });
         if (dialog != null) {
+          dialog.setCancelable(true);
           dialog.show();
         }
         return false;
@@ -597,6 +593,7 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
       else
       {
         String[] PERMISSIONS = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA};
+        this.callback = callback;
         if (activity instanceof ReactActivity)
         {
           ((ReactActivity) activity).requestPermissions(PERMISSIONS, requestCode, listener);
