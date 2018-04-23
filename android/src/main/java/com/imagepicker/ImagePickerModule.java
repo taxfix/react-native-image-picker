@@ -545,14 +545,41 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
     final int cameraPermission = ActivityCompat
             .checkSelfPermission(activity, Manifest.permission.CAMERA);
 
-    final boolean permissionsGrated = writePermission == PackageManager.PERMISSION_GRANTED &&
-            cameraPermission == PackageManager.PERMISSION_GRANTED;
+    final boolean permissionsGrated;
+
+    switch (requestCode)
+    {
+      case REQUEST_PERMISSIONS_FOR_CAMERA:
+        permissionsGrated = cameraPermission == PackageManager.PERMISSION_GRANTED;
+        break;
+
+      case REQUEST_PERMISSIONS_FOR_LIBRARY:
+        permissionsGrated = writePermission == PackageManager.PERMISSION_GRANTED;
+        break;
+
+      default:
+        permissionsGrated = cameraPermission == PackageManager.PERMISSION_GRANTED && writePermission == PackageManager.PERMISSION_GRANTED;
+    }
 
     if (!permissionsGrated)
     {
-      final Boolean ask = ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE) && ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.CAMERA);
+      final Boolean dontAskAgain;
 
-      if (!ask)
+      switch (requestCode)
+      {
+        case REQUEST_PERMISSIONS_FOR_CAMERA:
+          dontAskAgain = ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.CAMERA);
+          break;
+
+        case REQUEST_PERMISSIONS_FOR_LIBRARY:
+          dontAskAgain = ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+          break;
+
+        default:
+          dontAskAgain = ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.CAMERA) && ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+      }
+
+      if (dontAskAgain)
       {
         final AlertDialog dialog = PermissionUtils
                 .explainingDialog(this, options, new PermissionUtils.OnExplainingPermissionCallback()
@@ -594,6 +621,17 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
       {
         String[] PERMISSIONS = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA};
         this.callback = callback;
+        switch (requestCode)
+        {
+          case REQUEST_PERMISSIONS_FOR_CAMERA:
+            PERMISSIONS = new String[]{Manifest.permission.CAMERA};
+            break;
+
+          case REQUEST_PERMISSIONS_FOR_LIBRARY:
+            PERMISSIONS = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
+            break;
+        }
+
         if (activity instanceof ReactActivity)
         {
           ((ReactActivity) activity).requestPermissions(PERMISSIONS, requestCode, listener);
