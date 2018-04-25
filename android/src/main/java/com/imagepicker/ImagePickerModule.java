@@ -552,7 +552,7 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
     {
       final Boolean ask = ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE) && ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.CAMERA);
 
-      if (!ask)
+      if (ask)
       {
         final AlertDialog dialog = PermissionUtils
                 .explainingDialog(this, options, new PermissionUtils.OnExplainingPermissionCallback()
