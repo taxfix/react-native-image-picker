@@ -6,6 +6,7 @@
 #import <AVFoundation/AVFoundation.h>
 #import <Photos/Photos.h>
 #import <React/RCTUtils.h>
+#import <sys/utsname.h>
 
 @import MobileCoreServices;
 
@@ -24,6 +25,15 @@
 @implementation ImagePickerManager
 
 @synthesize bridge = _bridge;
+
+NSString* deviceName()
+{
+    struct utsname systemInfo;
+    uname(&systemInfo);
+    
+    return [NSString stringWithCString:systemInfo.machine
+                              encoding:NSUTF8StringEncoding];
+}
 
 RCT_EXPORT_MODULE();
 
@@ -212,12 +222,21 @@ RCT_EXPORT_METHOD(showImagePicker:(NSDictionary *)options callback:(RCTResponseS
         self.cameraOverlayView.backgroundColor = [UIColor clearColor];
 
         // wow, hacky. just to overlay the camera area, and not the controls. ish.
+        int topOffset = 44;
+        int heightOffset = 184;
+        
+        NSString *device = deviceName();
+        if ([device isEqualToString:@"iPhone10,3"] || [device isEqualToString:@"iPhone10,6"]) {
+            topOffset = 130;
+            heightOffset = 329;
+        }
+        
         CGRect rect = CGRectMake(CGRectGetMinX(self.picker.view.bounds),
-                                 CGRectGetMinY(self.picker.view.bounds) + 44,
+                                 CGRectGetMinY(self.picker.view.bounds) + topOffset,
                                  CGRectGetWidth(self.picker.view.bounds),
-                                 CGRectGetHeight(self.picker.view.bounds) - 184);
+                                 CGRectGetHeight(self.picker.view.bounds) - heightOffset);
         self.cameraOverlayView.frame = rect;
-
+        
         self.picker.cameraOverlayView = self.cameraOverlayView;
 
         [[NSNotificationCenter defaultCenter] addObserver:self
