@@ -229,7 +229,7 @@ RCT_EXPORT_METHOD(showImagePicker:(NSDictionary *)options callback:(RCTResponseS
             switch ((int)[[UIScreen mainScreen] nativeBounds].size.height) {
                 case 1136: // iPhone 5/5S/5C
                 case 1334: // iPhone 6/6S/7/8
-                case 1920, 2208: // iPhone 6+/6S+/7+/8+
+                case 1920: case 2208: // iPhone 6+/6S+/7+/8+
                     topOffset = 44;
                     heightOffset = 184;
                     break;
