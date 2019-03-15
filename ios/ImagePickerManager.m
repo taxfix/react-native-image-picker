@@ -225,10 +225,22 @@ RCT_EXPORT_METHOD(showImagePicker:(NSDictionary *)options callback:(RCTResponseS
         int topOffset = 44;
         int heightOffset = 184;
         
-        NSString *device = deviceName();
-        if ([device isEqualToString:@"iPhone10,3"] || [device isEqualToString:@"iPhone10,6"]) {
-            topOffset = 130;
-            heightOffset = 329;
+        if([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
+            switch ((int)[[UIScreen mainScreen] nativeBounds].size.height) {
+                case 1136: // iPhone 5/5S/5C
+                case 1334: // iPhone 6/6S/7/8
+                case 1920, 2208: // iPhone 6+/6S+/7+/8+
+                    topOffset = 44;
+                    heightOffset = 184;
+                    break;
+                case 2436: // iPhone X, XS
+                case 2688: // iPhone XS Max
+                case 1792: // iPhone XR
+                default:
+                    topOffset = 130;
+                    heightOffset = 329;
+                    break;
+            }
         }
         
         CGRect rect = CGRectMake(CGRectGetMinX(self.picker.view.bounds),
