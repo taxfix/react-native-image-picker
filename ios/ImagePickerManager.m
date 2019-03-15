@@ -238,7 +238,7 @@ RCT_EXPORT_METHOD(showImagePicker:(NSDictionary *)options callback:(RCTResponseS
                 case 1792: // iPhone XR
                 default:
                     topOffset = 130;
-                    heightOffset = 350;
+                    heightOffset = 360;
                     break;
             }
         }
