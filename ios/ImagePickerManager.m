@@ -210,8 +210,8 @@ RCT_EXPORT_METHOD(showImagePicker:(NSDictionary *)options callback:(RCTResponseS
         RCTBridge *bridge = self.bridge;
 
         // weird hack to get the ~real~ bridge, as it does the work we need
-        if ([bridge isKindOfClass:[RCTBatchedBridge class]]) {
-            RCTBatchedBridge *bb = (RCTBatchedBridge *)bridge;
+        if ([bridge isKindOfClass:[RCTBridge class]]) {
+            RCTBridge *bb = (RCTBridge *)bridge;
             bridge = bb.parentBridge;
         }
 
