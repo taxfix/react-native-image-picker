@@ -1,0 +1,14 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: react-native-image-picker
+  description: A React Native module that allows you to use native UI to select
+    media from the device library or directly from the camera
+  annotations: []
+spec:
+  type: library
+  lifecycle: production
+  domain: frontend-apps
+  system: unknown
+  owner: frontend-platform
+relations: []
