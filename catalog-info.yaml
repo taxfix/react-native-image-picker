@@ -9,4 +9,4 @@ spec:
   lifecycle: production
   domain: frontend-apps
   system: document-upload
-  owner: year-round-experience
+  owner: data-integration
